@@ -1,1 +1,1867 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrabTheEgg 🥚</title>
+<link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap)" rel="stylesheet">
+<style>
+:root {
+  --sky1:#7ec8e3;--sky2:#a8d8f0;--stripe:#c2eaff;
+  --blue:#1a6fb5;--blue2:#2196f3;
+  --gold:#f5c842;--goldd:#c9a020;
+  --red:#e53935;--redd:#b71c1c;
+  --green:#2ecc71;--greend:#1a9b55;
+  --text:#1a3a5c;
+  --glass:rgba(255,255,255,0.22);
+  --glassborder:rgba(255,255,255,0.55);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;user-select:none;}
+body{font-family:'Nunito',sans-serif;background:var(--sky2);}
+#bgc{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#wrap{position:relative;width:100vw;height:100vh;z-index:1;overflow:hidden;}
+#gc{position:absolute;inset:0;cursor:none;}
+#hud{position:absolute;top:12px;left:0;right:0;display:none;align-items:center;justify-content:space-between;padding:0 14px;z-index:20;gap:8px;flex-wrap:wrap;}
+.hud-pill{display:flex;align-items:center;gap:7px;background:var(--glass);border:1.5px solid var(--glassborder);border-radius:50px;padding:6px 15px 6px 8px;backdrop-filter:blur(8px);box-shadow:0 2px 14px rgba(0,0,0,0.08);}
+.coin-orb{width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#fff9a0,#f5c842 55%,#b8860b);border:2.5px solid #c9a020;box-shadow:0 2px 8px rgba(200,160,0,0.4),inset 0 1px 3px rgba(255,255,255,0.6);animation:cspin 2.8s linear infinite;flex-shrink:0;}
+@keyframes cspin{0%,100%{transform:scaleX(1)}50%{transform:scaleX(0.12)}}
+#coin-count{font-family:'Fredoka One',cursive;font-size:1.45rem;color:var(--text);}
+#level-pill{display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#9c27b0,#673ab7);color:#fff;border-radius:50px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:0.92rem;}
+#mute-btn{background:var(--glass);border:1.5px solid var(--glassborder);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;backdrop-filter:blur(8px);transition:transform .15s;flex-shrink:0;}
+#mute-btn:hover{transform:scale(1.12);}
+.hud-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#shop-btn,#lb-btn,#admin-btn{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#2ecc71,#1abc9c);color:#fff;border:none;border-radius:50px;padding:9px 18px;font-family:'Fredoka One',cursive;font-size:1.05rem;cursor:pointer;box-shadow:0 4px 14px rgba(46,204,113,0.38);transition:transform .14s,box-shadow .14s;}
+#lb-btn{background:linear-gradient(135deg,#ff9800,#f57c00);}
+#admin-btn{background:linear-gradient(135deg,#e53935,#b71c1c);display:none;}
+#shop-btn:hover,#lb-btn:hover,#admin-btn:hover{transform:scale(1.06);box-shadow:0 6px 20px rgba(46,204,113,0.5);}
+#shop-btn:active,#lb-btn:active,#admin-btn:active{transform:scale(0.96);}
+#bonus-pill{display:none;align-items:center;gap:5px;background:linear-gradient(135deg,#ff9800,#f44336);color:#fff;border-radius:50px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:0.92rem;animation:bonusPulse 0.8s ease-in-out infinite alternate;}
+@keyframes bonusPulse{from{box-shadow:0 0 0 rgba(255,87,34,0.4)}to{box-shadow:0 0 14px 4px rgba(255,87,34,0.5)}}
+#timer-pill{display:none;align-items:center;gap:5px;background:var(--glass);border:1.5px solid var(--glassborder);border-radius:50px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:0.95rem;color:var(--text);backdrop-filter:blur(8px);}
+#combo-display{position:absolute;top:72px;right:18px;z-index:21;font-family:'Fredoka One',cursive;font-size:1.6rem;text-shadow:0 2px 8px rgba(0,0,0,0.2);display:none;transition:color .2s;}
+#streak-bar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--glass);border:1.5px solid var(--glassborder);border-radius:50px;padding:5px 20px;font-family:'Fredoka One',cursive;font-size:0.9rem;color:var(--text);backdrop-filter:blur(8px);z-index:21;display:none;}
+#global-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#673ab7,#9c27b0);color:#fff;padding:20px 40px;border-radius:20px;font-family:'Fredoka One',cursive;font-size:1.5rem;text-align:center;z-index:100;display:none;box-shadow:0 10px 40px rgba(103,58,183,0.5);animation:msgPulse 2s ease-in-out infinite;}
+@keyframes msgPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.05)}}
 
+/* Auth Screen */
+#auth-screen{position:absolute;inset:0;z-index:35;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,30,80,0.4);backdrop-filter:blur(10px);}
+.auth-card{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-radius:30px;border:2px solid rgba(255,255,255,0.9);padding:40px 50px;display:flex;flex-direction:column;align-items:center;gap:18px;box-shadow:0 24px 70px rgba(26,111,181,0.25);max-width:420px;width:92vw;}
+.auth-title{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--text);}
+.auth-tabs{display:flex;gap:10px;width:100%;}
+.auth-tab{flex:1;padding:10px;border-radius:12px;border:2px solid transparent;background:rgba(200,200,200,0.3);font-family:'Fredoka One',cursive;font-size:1rem;color:var(--text);cursor:pointer;transition:all .15s;text-align:center;}
+.auth-tab.active{background:var(--blue2);color:#fff;border-color:var(--blue);}
+.auth-input{width:100%;padding:14px 18px;border-radius:14px;border:2px solid rgba(0,0,0,0.1);font-size:1.1rem;font-family:'Nunito',sans-serif;transition:border-color .2s;}
+.auth-input:focus{outline:none;border-color:var(--blue2);}
+.auth-btn{width:100%;background:linear-gradient(135deg,#2196f3,#1565c0);color:#fff;border:none;border-radius:50px;padding:14px;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 14px rgba(33,150,243,0.35);transition:transform .12s;}
+.auth-btn:hover{transform:scale(1.03);}
+.auth-error{color:#e53935;font-size:0.9rem;min-height:20px;}
+.auth-skip{background:transparent;border:none;color:#666;font-size:0.9rem;cursor:pointer;text-decoration:underline;margin-top:10px;}
+
+/* Start Screen */
+#start-screen{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+.game-logo{font-family:'Fredoka One',cursive;font-size:clamp(2.8rem,8vw,5rem);color:var(--text);text-shadow:0 5px 0 rgba(255,255,255,0.7),0 10px 28px rgba(26,111,181,0.18);letter-spacing:3px;line-height:1.1;}
+.logo-egg{display:inline-block;animation:logoEgg 1.1s ease-in-out infinite alternate;}
+@keyframes logoEgg{from{transform:translateY(0)rotate(-12deg)scale(1)}to{transform:translateY(-14px)rotate(12deg)scale(1.08)}}
+.glass-card{background:rgba(255,255,255,0.35);border:2px solid var(--glassborder);border-radius:24px;padding:14px 28px;backdrop-filter:blur(10px);font-size:0.95rem;color:var(--text);opacity:0.85;text-align:center;}
+.user-welcome{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--blue);}
+.start-btn{background:var(--red);color:#fff;border:none;border-radius:50px;padding:16px 56px;font-family:'Fredoka One',cursive;font-size:1.75rem;cursor:pointer;letter-spacing:1px;box-shadow:0 7px 0 var(--redd),0 12px 28px rgba(229,57,53,0.32);transition:transform .12s,box-shadow .12s;position:relative;overflow:hidden;}
+.start-btn::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);animation:btnShine 2.5s ease-in-out infinite;}
+@keyframes btnShine{0%{left:-100%}60%,100%{left:200%}}
+.start-btn:hover{transform:translateY(-4px);box-shadow:0 11px 0 var(--redd),0 16px 32px rgba(229,57,53,0.4);}
+.start-btn:active{transform:translateY(3px);box-shadow:0 4px 0 var(--redd);}
+.logout-btn{background:transparent;border:2px solid var(--red);color:var(--red);border-radius:50px;padding:8px 24px;font-family:'Fredoka One',cursive;font-size:0.95rem;cursor:pointer;margin-top:10px;transition:all .15s;}
+.logout-btn:hover{background:var(--red);color:#fff;}
+
+/* Game Over */
+#go-screen{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,30,60,0.35);backdrop-filter:blur(6px);}
+.go-card{background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);border-radius:30px;border:2px solid rgba(255,255,255,0.9);padding:44px 64px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 24px 70px rgba(26,111,181,0.22);}
+.go-emoji{font-size:4.5rem;animation:goShake .45s ease-in-out infinite alternate;}
+@keyframes goShake{from{transform:rotate(-18deg)scale(1)}to{transform:rotate(18deg)scale(1.05)}}
+.go-title{font-family:'Fredoka One',cursive;font-size:3.2rem;color:var(--red);}
+.go-sub{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);}
+.go-best{font-size:0.95rem;color:#666;}
+.go-level{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--blue);margin-top:5px;}
+
+/* Shop Modal */
+#shop-modal{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(10,30,80,0.3);backdrop-filter:blur(8px);}
+.shop-card{background:linear-gradient(150deg,#dff4ff 0%,#fff 60%,#ffe8f0 100%);border-radius:28px;border:2px solid rgba(255,255,255,0.85);padding:28px 28px 20px;max-width:540px;width:96vw;box-shadow:0 28px 70px rgba(26,111,181,0.2);max-height:92vh;overflow-y:auto;}
+.shop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.shop-title{font-family:'Fredoka One',cursive;font-size:1.9rem;color:var(--text);}
+.shop-coins{display:flex;align-items:center;gap:6px;background:rgba(245,200,66,0.18);border:1.5px solid rgba(201,160,32,0.3);border-radius:50px;padding:5px 14px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);}
+.shop-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.shop-tab{flex:1;min-width:70px;padding:8px;border-radius:12px;border:2px solid transparent;background:rgba(255,255,255,0.5);font-family:'Fredoka One',cursive;font-size:0.85rem;color:var(--text);cursor:pointer;transition:all .15s;text-align:center;}
+.shop-tab.active{background:var(--blue2);color:#fff;border-color:var(--blue);}
+.shop-tab:hover:not(.active){background:rgba(255,255,255,0.8);}
+.shop-grid{display:flex;flex-direction:column;gap:11px;}
+.shop-item{background:rgba(255,255,255,0.75);border:2px solid rgba(168,216,240,0.6);border-radius:20px;padding:12px 14px;display:flex;align-items:center;gap:12px;transition:transform .12s,box-shadow .12s;}
+.shop-item:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(33,150,243,0.12);}
+.shop-item.maxed{border-color:rgba(255,215,0,0.5);background:rgba(255,250,220,0.7);}
+.shop-item.locked{opacity:0.5;pointer-events:none;}
+.shop-icon{font-size:2rem;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);border-radius:14px;border:1.5px solid rgba(255,255,255,0.9);box-shadow:0 2px 8px rgba(0,0,0,0.07);}
+.shop-info{flex:1;min-width:0;}
+.shop-name{font-weight:800;font-size:0.97rem;color:var(--text);}
+.shop-desc{font-size:0.78rem;color:#555;margin-top:2px;line-height:1.3;}
+.shop-unlock{font-size:0.72rem;color:#e53935;font-weight:700;}
+.shop-level-bar{margin-top:5px;height:5px;border-radius:3px;background:rgba(0,0,0,0.08);overflow:hidden;}
+.shop-level-fill{height:100%;border-radius:3px;transition:width .3s;}
+.shop-level-text{font-size:0.73rem;color:var(--blue);font-weight:700;margin-top:3px;}
+.shop-buy{background:linear-gradient(135deg,#2196f3,#1565c0);color:#fff;border:none;border-radius:50px;padding:7px 15px;font-family:'Fredoka One',cursive;font-size:0.93rem;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 3px 10px rgba(33,150,243,0.3);transition:transform .12s,opacity .12s;display:flex;align-items:center;gap:4px;}
+.shop-buy:hover{transform:scale(1.06);}
+.shop-buy:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.shop-buy.maxed-btn{background:linear-gradient(135deg,#f5c842,#e6a500);color:#333;}
+.close-shop{display:block;margin:16px auto 0;background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;border:none;border-radius:50px;padding:10px 38px;font-family:'Fredoka One',cursive;font-size:1.15rem;cursor:pointer;box-shadow:0 4px 14px rgba(229,57,53,0.28);transition:transform .12s;}
+.close-shop:hover{transform:scale(1.04);}
+
+/* Leaderboard Modal */
+#lb-modal{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(10,30,80,0.3);backdrop-filter:blur(8px);}
+.lb-card{background:linear-gradient(150deg,#fff8e1 0%,#fff 60%,#e8f5e9 100%);border-radius:28px;border:2px solid rgba(255,255,255,0.85);padding:28px;max-width:480px;width:96vw;box-shadow:0 28px 70px rgba(26,111,181,0.2);max-height:85vh;overflow-y:auto;}
+.lb-title{font-family:'Fredoka One',cursive;font-size:1.9rem;color:var(--text);text-align:center;margin-bottom:20px;}
+.lb-list{display:flex;flex-direction:column;gap:8px;}
+.lb-item{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.7);border-radius:16px;padding:12px 16px;border:2px solid transparent;transition:all .15s;}
+.lb-item.top1{background:linear-gradient(135deg,#ffd700,#ffeb3b);border-color:#ffc107;}
+.lb-item.top2{background:linear-gradient(135deg,#e0e0e0,#bdbdbd);border-color:#9e9e9e;}
+.lb-item.top3{background:linear-gradient(135deg,#ffcc80,#ff9800);border-color:#f57c00;}
+.lb-item.me{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(33,150,243,0.3);}
+.lb-item.banned{opacity:0.4;text-decoration:line-through;}
+.lb-rank{font-family:'Fredoka One',cursive;font-size:1.4rem;min-width:40px;text-align:center;}
+.lb-name{flex:1;font-weight:700;font-size:1rem;color:var(--text);}
+.lb-score{font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--gold);}
+.lb-level{font-size:0.8rem;color:#666;margin-left:8px;}
+
+/* Admin Modal */
+#admin-modal{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(10,10,30,0.5);backdrop-filter:blur(10px);}
+.admin-card{background:linear-gradient(150deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);border-radius:28px;border:2px solid rgba(255,100,100,0.3);padding:28px;max-width:700px;width:96vw;box-shadow:0 28px 70px rgba(0,0,0,0.5);max-height:92vh;overflow-y:auto;color:#fff;}
+.admin-title{font-family:'Fredoka One',cursive;font-size:2rem;color:#ff5722;text-align:center;margin-bottom:20px;text-shadow:0 0 20px rgba(255,87,34,0.5);}
+.admin-tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.admin-tab{flex:1;min-width:80px;padding:10px;border-radius:12px;background:rgba(255,255,255,0.1);font-family:'Fredoka One',cursive;font-size:0.9rem;color:#fff;cursor:pointer;transition:all .15s;text-align:center;border:2px solid transparent;}
+.admin-tab.active{background:linear-gradient(135deg,#e53935,#b71c1c);border-color:#ff5722;}
+.admin-tab:hover:not(.active){background:rgba(255,255,255,0.2);}
+.admin-section{display:none;}
+.admin-section.active{display:block;}
+.admin-input{width:100%;padding:12px 16px;border-radius:12px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;margin-bottom:10px;}
+.admin-input:focus{outline:none;border-color:#ff5722;}
+.admin-textarea{width:100%;padding:12px 16px;border-radius:12px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;min-height:100px;resize:vertical;margin-bottom:10px;}
+.admin-btn{background:linear-gradient(135deg,#ff5722,#e64a19);color:#fff;border:none;border-radius:50px;padding:10px 24px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;margin:5px;transition:transform .12s;}
+.admin-btn:hover{transform:scale(1.05);}
+.admin-btn.green{background:linear-gradient(135deg,#4caf50,#2e7d32);}
+.admin-btn.blue{background:linear-gradient(135deg,#2196f3,#1565c0);}
+.admin-btn.yellow{background:linear-gradient(135deg,#ff9800,#f57c00);}
+.admin-user-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;}
+.admin-user-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 14px;}
+.admin-user-item.banned{background:rgba(255,0,0,0.2);}
+.admin-user-name{flex:1;font-weight:700;}
+.admin-user-coins{color:#ffd700;font-family:'Fredoka One',cursive;}
+.admin-user-actions{display:flex;gap:5px;}
+.admin-user-actions button{padding:5px 10px;font-size:0.8rem;border-radius:8px;border:none;cursor:pointer;font-family:'Fredoka One',cursive;}
+.admin-log{background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;max-height:200px;overflow-y:auto;font-family:monospace;font-size:0.85rem;color:#aaa;}
+.close-admin{display:block;margin:20px auto 0;background:linear-gradient(135deg,#607d8b,#455a64);color:#fff;border:none;border-radius:50px;padding:10px 38px;font-family:'Fredoka One',cursive;font-size:1.15rem;cursor:pointer;}
+
+/* Floating text */
+.flt{position:absolute;pointer-events:none;z-index:25;font-family:'Fredoka One',cursive;text-shadow:0 2px 6px rgba(0,0,0,0.25);animation:fltUp 1.1s ease-out forwards;white-space:nowrap;}
+@keyframes fltUp{0%{opacity:1;transform:translateY(0)scale(1)}70%{opacity:1}100%{opacity:0;transform:translateY(-80px)scale(1.4)}}
+#screen-flash{position:absolute;inset:0;z-index:28;pointer-events:none;opacity:0;transition:opacity .12s;}
+#announce{position:absolute;top:76px;left:50%;transform:translateX(-50%);font-family:'Fredoka One',cursive;font-size:1.15rem;color:#fff;background:linear-gradient(135deg,#e53935,#ff5722);border-radius:50px;padding:7px 24px;z-index:22;opacity:0;pointer-events:none;box-shadow:0 4px 16px rgba(229,57,53,0.35);transition:opacity .3s;white-space:nowrap;}
+.raindrop{position:absolute;top:0;width:2px;border-radius:2px;background:linear-gradient(to bottom,transparent,rgba(200,230,255,0.55));animation:fall linear infinite;pointer-events:none;z-index:2;}
+@keyframes fall{from{transform:translateY(-40px)}to{transform:translateY(110vh)}}
+.shop-card::-webkit-scrollbar,.lb-card::-webkit-scrollbar,.admin-card::-webkit-scrollbar{width:5px;}
+.shop-card::-webkit-scrollbar-track,.lb-card::-webkit-scrollbar-track,.admin-card::-webkit-scrollbar-track{background:transparent;}
+.shop-card::-webkit-scrollbar-thumb,.lb-card::-webkit-scrollbar-thumb{background:rgba(33,150,243,0.3);border-radius:3px;}
+.admin-card::-webkit-scrollbar-thumb{background:rgba(255,87,34,0.3);border-radius:3px;}
+
+/* Event banner */
+#event-banner{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#9c27b0,#673ab7);color:#fff;padding:8px 24px;border-radius:50px;font-family:'Fredoka One',cursive;font-size:0.95rem;z-index:23;display:none;box-shadow:0 4px 20px rgba(156,39,176,0.4);animation:eventPulse 1.5s ease-in-out infinite;}
+@keyframes eventPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.03)}}
+</style>
+</head>
+<body>
+<canvas id="bgc"></canvas>
+<div id="wrap">
+  <canvas id="gc"></canvas>
+  <div id="hud">
+    <div class="hud-pill">
+      <div class="coin-orb"></div>
+      <span id="coin-count">0</span>
+    </div>
+    <div id="level-pill">⭐ Рівень <span id="level-val">1</span></div>
+    <div id="bonus-pill">⚡ 2× Монети!</div>
+    <div id="timer-pill">⏱ <span id="timer-val">—</span></div>
+    <div class="hud-right">
+      <div id="mute-btn">🔊</div>
+      <button id="lb-btn">🏆 Лідери</button>
+      <button id="shop-btn">🛒 Shop</button>
+      <button id="admin-btn">👑 Admin</button>
+    </div>
+  </div>
+  <div id="combo-display"></div>
+  <div id="streak-bar"></div>
+  <div id="announce"></div>
+  <div id="event-banner"></div>
+  <div id="screen-flash"></div>
+  <div id="global-msg"></div>
+
+  <!-- Auth Screen -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-title">🥚 GrabTheEgg</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Вхід</div>
+        <div class="auth-tab" data-tab="register">Реєстрація</div>
+      </div>
+      <input type="text" class="auth-input" id="auth-name" placeholder="Нікнейм">
+      <input type="password" class="auth-input" id="auth-pass" placeholder="Пароль">
+      <div class="auth-error" id="auth-error"></div>
+      <button class="auth-btn" id="auth-btn">Увійти</button>
+      <button class="auth-skip" id="auth-skip">Грати як гість</button>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <div class="game-logo">Grab<span style="color:var(--blue)">The</span><span class="logo-egg">🥚</span></div>
+    <div class="user-welcome" id="user-welcome">Привіт, Гість!</div>
+    <div class="glass-card">Рухай рукою — лови яйця!<br>Не пропусти велике яйце 🚨</div>
+    <button class="start-btn" id="start-btn">▶ СТАРТ</button>
+    <button class="logout-btn" id="logout-btn">🚪 Вийти</button>
+  </div>
+
+  <!-- Game Over -->
+  <div id="go-screen">
+    <div class="go-card">
+      <div class="go-emoji" id="go-emoji">💥🥚</div>
+      <div class="go-title">GAME OVER</div>
+      <div class="go-sub" id="go-sub">Монет: 0 🪙</div>
+      <div class="go-level" id="go-level">Рівень: 1</div>
+      <div class="go-best" id="go-best"></div>
+      <button class="start-btn" id="restart-btn" style="font-size:1.3rem;padding:13px 44px">🔄 Start Again</button>
+    </div>
+  </div>
+
+  <!-- Shop Modal -->
+  <div id="shop-modal">
+    <div class="shop-card">
+      <div class="shop-header">
+        <div class="shop-title">🛒 Магазин</div>
+        <div class="shop-coins">🪙 <span id="shop-coins-val">0</span></div>
+      </div>
+      <div class="shop-tabs">
+        <div class="shop-tab active" data-tab="hand">🤚 Рука</div>
+        <div class="shop-tab" data-tab="egg">🥚 Яйця</div>
+        <div class="shop-tab" data-tab="power">⚡ Сила</div>
+        <div class="shop-tab" data-tab="gloves">🧤 Рукавиці</div>
+        <div class="shop-tab" data-tab="special">🌟 Спец</div>
+      </div>
+      <div class="shop-grid" id="shop-grid"></div>
+      <button class="close-shop" id="close-shop">✕ Закрити</button>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="lb-modal">
+    <div class="lb-card">
+      <div class="lb-title">🏆 Таблиця Лідерів</div>
+      <div class="lb-list" id="lb-list"></div>
+      <button class="close-shop" id="close-lb">✕ Закрити</button>
+    </div>
+  </div>
+
+  <!-- Admin Modal -->
+  <div id="admin-modal">
+    <div class="admin-card">
+      <div class="admin-title">👑 ADMIN PANEL</div>
+      <div class="admin-tabs">
+        <div class="admin-tab active" data-tab="users">👥 Гравці</div>
+        <div class="admin-tab" data-tab="broadcast">📢 Повідомлення</div>
+        <div class="admin-tab" data-tab="events">🎉 Події</div>
+        <div class="admin-tab" data-tab="items">🎁 Предмети</div>
+        <div class="admin-tab" data-tab="abuse">💥 Abuse</div>
+        <div class="admin-tab" data-tab="logs">📋 Логи</div>
+      </div>
+      
+      <div class="admin-section active" id="admin-users">
+        <h3 style="margin-bottom:10px">Управління гравцями</h3>
+        <input type="text" class="admin-input" id="admin-search" placeholder="Пошук гравця...">
+        <div class="admin-user-list" id="admin-user-list"></div>
+      </div>
+
+      <div class="admin-section" id="admin-broadcast">
+        <h3 style="margin-bottom:10px">Глобальне повідомлення</h3>
+        <textarea class="admin-textarea" id="broadcast-msg" placeholder="Введіть повідомлення для всіх гравців..."></textarea>
+        <input type="number" class="admin-input" id="broadcast-duration" placeholder="Тривалість (секунд)" value="10">
+        <button class="admin-btn" onclick="sendBroadcast()">📢 Відправити всім</button>
+      </div>
+
+      <!-- НАСТУПНИЙ БЛОК - ПОКРАЩЕНА СЕКЦІЯ ПОДІЙ -->
+      <div class="admin-section" id="admin-events">
+        <h3 style="margin-bottom:10px">Активувати подію</h3>
+        <select class="admin-input" id="event-select">
+          <option value="">Оберіть подію...</option>
+          <option value="double_coins" data-desc="Подвійні монети для всіх гравців (5 хвилин)">💰 2× Монети (5 хв)</option>
+          <option value="golden_hour" data-desc="Золота година: тільки золоті яйця падають (5 хвилин)">🌟 Золота година (5 хв)</option>
+          <option value="rainbow_fest" data-desc="Веселковий фест: підвищена ймовірність веселкових яєць (5 хвилин)">🌈 Веселковий фест (5 хв)</option>
+          <option value="speed_run" data-desc="Швидкісний режим: швидше падають яйця (5 хвилин)">⚡ Швидкісний режим (5 хв)</option>
+          <option value="mega_eggs" data-desc="Мега яйця: частіше великі яйця (5 хвилин)">🥚 Мега яйця (5 хв)</option>
+          <option value="coin_rain" data-desc="Дощ з монет: додатково падають монети (5 хвилин)">💵 Дощ з монет (5 хв)</option>
+        </select>
+        <p id="event-desc" style="color:#fff; margin:8px 0 12px; min-height:30px;"></p>
+        <input type="number" class="admin-input" id="event-duration" placeholder="Тривалість (хвилин)" value="5" min="1" max="60" />
+        <button class="admin-btn green" onclick="activateEvent()">🎉 Запустити подію</button>
+        <button class="admin-btn" onclick="stopEvent()">⏹ Зупинити подію</button>
+      </div>
+
+      <div class="admin-section" id="admin-items">
+        <h3 style="margin-bottom:10px">Додати нові предмети</h3>
+        <input type="text" class="admin-input" id="item-name" placeholder="Назва предмету">
+        <input type="text" class="admin-input" id="item-icon" placeholder="Emoji іконка (напр. 🎁)">
+        <textarea class="admin-textarea" id="item-desc" placeholder="Опис предмету"></textarea>
+        <input type="number" class="admin-input" id="item-cost" placeholder="Вартість">
+        <select class="admin-input" id="item-category">
+          <option value="special">🌟 Спеціальний</option>
+          <option value="gloves">🧤 Рукавиця</option>
+          <option value="egg">🥚 Яйце</option>
+        </select>
+        <button class="admin-btn green" onclick="addCustomItem()">➕ Додати предмет</button>
+      </div>
+
+      <div class="admin-section" id="admin-abuse">
+        <h3 style="margin-bottom:10px">💥 Admin Abuse Mode</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="admin-btn yellow" onclick="adminAbuse('coins',1000)">+1000 🪙</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('coins',10000)">+10000 🪙</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('level',10)">+10 Рівнів</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('unlockAll')">🔓 Відкрити все</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('maxUpgrades')">⬆️ MAX апгрейди</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('godMode')">👼 God Mode</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('infiniteShield')">🛡️ ∞ Щити</button>
+          <button class="admin-btn yellow" onclick="adminAbuse('megaMagnet')">🧲 Мега магніт</button>
+        </div>
+      </div>
+
+      <div class="admin-section" id="admin-logs">
+        <h3 style="margin-bottom:10px">Системні логи</h3>
+        <div class="admin-log" id="admin-log"></div>
+        <button class="admin-btn" onclick="clearLogs()">🗑️ Очистити логи</button>
+      </div>
+
+      <button class="close-admin" id="close-admin">✕ Закрити</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATABASE (LocalStorage simulation)
+// ══════════════════════════════════════════════
+const DB = {
+  users: JSON.parse(localStorage.getItem('gte_users') || '{}'),
+  currentUser: null,
+  logs: JSON.parse(localStorage.getItem('gte_logs') || '[]'),
+  globalMsg: JSON.parse(localStorage.getItem('gte_globalmsg') || 'null'),
+  activeEvent: JSON.parse(localStorage.getItem('gte_event') || 'null'),
+  customItems: JSON.parse(localStorage.getItem('gte_customitems') || '[]'),
+  
+  save() {
+    localStorage.setItem('gte_users', JSON.stringify(this.users));
+    localStorage.setItem('gte_logs', JSON.stringify(this.logs));
+    localStorage.setItem('gte_globalmsg', JSON.stringify(this.globalMsg));
+    localStorage.setItem('gte_event', JSON.stringify(this.activeEvent));
+    localStorage.setItem('gte_customitems', JSON.stringify(this.customItems));
+  },
+  
+  log(action, details = '') {
+    const entry = {
+      time: new Date().toLocaleString('uk'),
+      user: this.currentUser?.name || 'System',
+      action,
+      details
+    };
+    this.logs.unshift(entry);
+    if (this.logs.length > 100) this.logs.pop();
+    this.save();
+  },
+  
+  register(name, pass) {
+    if (this.users[name]) return { error: 'Користувач вже існує!' };
+    if (name.length < 2) return { error: 'Нікнейм занадто короткий!' };
+    if (pass.length < 3) return { error: 'Пароль занадто короткий!' };
+    
+    this.users[name] = {
+      name,
+      pass,
+      coins: 0,
+      bestScore: 0,
+      level: 1,
+      xp: 0,
+      upgrades: {},
+      isAdmin: name === 'ADMINN' && pass === 'ADMINN',
+      isBanned: false,
+      createdAt: Date.now(),
+      lastSeen: Date.now(),
+      gamesPlayed: 0,
+      totalCoins: 0
+    };
+    this.save();
+    this.log('REGISTER', `Новий гравець: ${name}`);
+    return { success: true };
+  },
+  
+  login(name, pass) {
+    const user = this.users[name];
+    if (!user) return { error: 'Користувача не знайдено!' };
+    if (user.pass !== pass) return { error: 'Невірний пароль!' };
+    if (user.isBanned) return { error: 'Ваш акаунт заблоковано!' };
+    
+    user.lastSeen = Date.now();
+    this.currentUser = user;
+    this.save();
+    this.log('LOGIN', `Вхід: ${name}`);
+    return { success: true, user };
+  },
+  
+  updateUser(data) {
+    if (!this.currentUser) return;
+    Object.assign(this.currentUser, data);
+    this.users[this.currentUser.name] = this.currentUser;
+    this.save();
+  },
+  
+  getLeaderboard() {
+    return Object.values(this.users)
+      .sort((a, b) => b.bestScore - a.bestScore)
+      .slice(0, 50);
+  }
+};
+
+// ══════════════════════════════════════════════
+// LEVELS SYSTEM
+// ══════════════════════════════════════════════
+const LEVELS = {
+  getXPForLevel(lvl) {
+    return Math.floor(100 * Math.pow(1.5, lvl - 1));
+  },
+  
+  addXP(amount) {
+    if (!DB.currentUser) return;
+    DB.currentUser.xp += amount;
+    
+    while (DB.currentUser.xp >= this.getXPForLevel(DB.currentUser.level)) {
+      DB.currentUser.xp -= this.getXPForLevel(DB.currentUser.level);
+      DB.currentUser.level++;
+      this.onLevelUp(DB.currentUser.level);
+    }
+    
+    DB.updateUser({ xp: DB.currentUser.xp, level: DB.currentUser.level });
+    updateLevelDisplay();
+  },
+  
+  onLevelUp(lvl) {
+    announce(`🎉 РІВЕНЬ ${lvl}!`);
+    sfxBonus();
+    flashScreen('rgba(156,39,176,0.4)');
+    
+    // Level rewards
+    const reward = lvl * 10;
+    coins += reward;
+    updateCoinDisplay();
+    showFloat(canvas.width/2, canvas.height/2, `+${reward} 🪙 БОНУС!`, '#9c27b0');
+  },
+  
+  getUnlockedItems(lvl) {
+    return {
+      gloves: lvl >= 3,
+      rainbow: lvl >= 5,
+      magnet: lvl >= 4,
+      frenzy: lvl >= 8,
+      ghost: lvl >= 10,
+      megaHand: lvl >= 15
+    };
+  }
+};
+
+function updateLevelDisplay() {
+  const lvl = DB.currentUser?.level || 1;
+  document.getElementById('level-val').textContent = lvl;
+}
+
+// ══════════════════════════════════════════════
+// AUDIO ENGINE
+// ══════════════════════════════════════════════
+let AC=null, muted=false, musicGain, sfxGain, musicLpId;
+
+function initAudio(){
+  if(AC) return;
+  AC=new(window.AudioContext||window.webkitAudioContext)();
+  musicGain=AC.createGain(); musicGain.gain.value=0.24; musicGain.connect(AC.destination);
+  sfxGain=AC.createGain();   sfxGain.gain.value=0.52;   sfxGain.connect(AC.destination);
+  scheduleMusic();
+}
+
+function scheduleMusic(){
+  const BPM=132, b=60/BPM;
+  const bass=[110,110,123.47,0,98,110,130.81,0];
+  const lead=[523,0,659,784,0,659,523,0,440,523,0,659,784,0,1047,0];
+  const chord=[[261,329,392],[220,277,330],[196,247,294],[174,220,261]];
+  let t=AC.currentTime+0.05;
+  const step=b*0.5;
+
+  function osc(type,freq,vol,start,dur,dst){
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0,start);
+    g.gain.linearRampToValueAtTime(vol,start+0.015);
+    g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+    o.connect(g); g.connect(dst);
+    o.start(start); o.stop(start+dur+0.01);
+  }
+  function noise(vol,start,dur,dst){
+    const buf=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let j=0;j<d.length;j++) d[j]=Math.random()*2-1;
+    const s=AC.createBufferSource(), g=AC.createGain(), f=AC.createBiquadFilter();
+    f.type='highpass'; f.frequency.value=7000;
+    g.gain.setValueAtTime(vol,start);
+    g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+    s.buffer=buf; s.connect(f); f.connect(g); g.connect(dst);
+    s.start(start); s.stop(start+dur+0.01);
+  }
+
+  bass.forEach((f,i)=>{ if(f) osc('sawtooth',f,0.16,t+i*step,step*0.8,musicGain); });
+  lead.forEach((f,i)=>{ if(f) osc('square',f,0.07,t+i*step*0.5,step*0.4,musicGain); });
+  for(let i=0;i<4;i++){
+    chord[i].forEach(f=>osc('triangle',f,0.04,t+i*step*4,step*3.5,musicGain));
+  }
+  for(let i=0;i<16;i++) noise(0.1,t+i*step*0.5,0.04,musicGain);
+  [0,4,8,12].forEach(i=>osc('sine',60,0.35,t+i*step,step*0.55,musicGain));
+
+  const loopDur=bass.length*step*1000-50;
+  musicLpId=setTimeout(scheduleMusic, loopDur);
+}
+
+function setMute(m){
+  muted=m;
+  document.getElementById('mute-btn').textContent=m?'🔇':'🔊';
+  if(!AC) return;
+  musicGain.gain.value=m?0:0.24;
+  sfxGain.gain.value=m?0:0.52;
+}
+
+function osfx(type,f0,f1,vol,dur){
+  if(!AC||muted) return;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type=type; o.frequency.setValueAtTime(f0,AC.currentTime);
+  if(f1!==f0) o.frequency.exponentialRampToValueAtTime(f1,AC.currentTime+dur);
+  g.gain.setValueAtTime(vol,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+  o.connect(g); g.connect(sfxGain);
+  o.start(); o.stop(AC.currentTime+dur+0.01);
+}
+function sfxCatch(isRed,isBig,isRainbow){
+  if(!AC||muted) return;
+  const f=isRainbow?1047:isRed?880:isBig?660:440+Math.random()*160;
+  osfx('sine',f,f*1.4,0.38,0.2);
+  if(isBig||isRainbow){ setTimeout(()=>osfx('triangle',f*1.5,f*2,0.2,0.15),80); }
+}
+function sfxCombo(n){
+  const freqs=[523,659,784,1047,1319];
+  osfx('triangle',freqs[Math.min(n-1,4)],freqs[Math.min(n-1,4)]*1.3,0.3,0.28);
+}
+function sfxGameOver(){
+  if(!AC||muted) return;
+  [440,349,294,185].forEach((f,i)=>{
+    const t=AC.currentTime+i*0.19;
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type='sawtooth'; o.frequency.value=f;
+    g.gain.setValueAtTime(0.32,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+    o.connect(g); g.connect(sfxGain); o.start(t); o.stop(t+0.28);
+  });
+}
+function sfxBuy(){ osfx('sine',440,880,0.3,0.25); setTimeout(()=>osfx('triangle',880,1320,0.2,0.18),120); }
+function sfxBonus(){
+  if(!AC||muted) return;
+  [523,659,784,1047,1319,1568].forEach((f,i)=>{
+    const t=AC.currentTime+i*0.07;
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type='triangle'; o.frequency.value=f;
+    g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+    o.connect(g); g.connect(sfxGain); o.start(t); o.stop(t+0.2);
+  });
+}
+function sfxMiss(){ osfx('sawtooth',220,90,0.2,0.18); }
+function sfxBomb(){ if(!AC||muted) return; osfx('sawtooth',80,40,0.5,0.3); setTimeout(()=>osfx('square',160,80,0.3,0.25),80); }
+
+// ══════════════════════════════════════════════
+// BACKGROUND
+// ══════════════════════════════════════════════
+const bgc=document.getElementById('bgc');
+const bx=bgc.getContext('2d');
+let clouds=[];
+
+function initClouds(){
+  clouds=[];
+  for(let i=0;i<8;i++) clouds.push({
+    x:Math.random()*bgc.width, y:50+Math.random()*(bgc.height*0.38),
+    w:100+Math.random()*180, h:35+Math.random()*55,
+    spd:0.12+Math.random()*0.28, al:0.25+Math.random()*0.3
+  });
+}
+
+function drawBG(){
+  bgc.width=window.innerWidth; bgc.height=window.innerHeight;
+  const sg=bx.createLinearGradient(0,0,0,bgc.height);
+  
+  // Event-based sky colors
+  if (DB.activeEvent?.type === 'golden_hour') {
+    sg.addColorStop(0,'#ff8f00'); sg.addColorStop(0.5,'#ffca28'); sg.addColorStop(1,'#fff8e1');
+  } else if (DB.activeEvent?.type === 'rainbow_fest') {
+    sg.addColorStop(0,'#e91e63'); sg.addColorStop(0.3,'#ff9800'); sg.addColorStop(0.5,'#4caf50'); sg.addColorStop(0.7,'#2196f3'); sg.addColorStop(1,'#9c27b0');
+  } else {
+    sg.addColorStop(0,'#4db8e8'); sg.addColorStop(0.5,'#a8d8f0'); sg.addColorStop(1,'#caeeff');
+  }
+  bx.fillStyle=sg; bx.fillRect(0,0,bgc.width,bgc.height);
+  
+  const sw=bgc.width*0.42, cx=bgc.width/2;
+  bx.fillStyle='rgba(195,235,255,0.52)';
+  bx.fillRect(cx-sw/2,0,sw,bgc.height);
+  
+  bx.strokeStyle='rgba(255,255,255,0.11)'; bx.lineWidth=1;
+  for(let x=0;x<bgc.width;x+=55){bx.beginPath();bx.moveTo(x,0);bx.lineTo(x,bgc.height);bx.stroke();}
+  for(let y=0;y<bgc.height;y+=55){bx.beginPath();bx.moveTo(0,y);bx.lineTo(bgc.width,y);bx.stroke();}
+  
+  clouds.forEach(c=>{
+    c.x+=c.spd; if(c.x>bgc.width+c.w) c.x=-c.w;
+    bx.fillStyle=`rgba(255,255,255,${c.al})`;
+    [[c.x,c.y,c.w/2,c.h/2],[c.x-c.w*0.26,c.y+c.h*0.12,c.w*0.3,c.h*0.42],[c.x+c.w*0.26,c.y+c.h*0.1,c.w*0.28,c.h*0.4]].forEach(e=>{
+      bx.beginPath(); bx.ellipse(e[0],e[1],e[2],e[3],0,0,Math.PI*2); bx.fill();
+    });
+  });
+  
+  const gg=bx.createLinearGradient(0,bgc.height-60,0,bgc.height);
+  gg.addColorStop(0,'#7ec850'); gg.addColorStop(1,'#5aaa30');
+  bx.fillStyle=gg; bx.fillRect(0,bgc.height-55,bgc.width,55);
+  bx.fillStyle='rgba(158,216,112,0.7)';
+  for(let x=0;x<bgc.width;x+=16){
+    bx.beginPath(); bx.ellipse(x,bgc.height-55,8,11,0,Math.PI,Math.PI*2); bx.fill();
+  }
+}
+
+function resizeBG(){ bgc.width=window.innerWidth; bgc.height=window.innerHeight; initClouds(); drawBG(); }
+resizeBG();
+window.addEventListener('resize',resizeBG);
+setInterval(drawBG,80);
+
+(function addRain(){
+  for(let i=0;i<16;i++){
+    const d=document.createElement('div'); d.className='raindrop';
+    d.style.left=Math.random()*100+'vw';
+    d.style.height=(18+Math.random()*28)+'px';
+    d.style.animationDuration=(0.45+Math.random()*0.55)+'s';
+    d.style.animationDelay=(-Math.random())+'s';
+    d.style.opacity=0.45+Math.random()*0.4;
+    document.getElementById('wrap').appendChild(d);
+  }
+})();
+
+// ══════════════════════════════════════════════
+// GAME
+// ══════════════════════════════════════════════
+const canvas=document.getElementById('gc');
+const ctx=canvas.getContext('2d');
+function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resize(); window.addEventListener('resize',resize);
+
+let coins=0, bestCoins=0, gameRunning=false, animId=null;
+let targetX=400, targetY=400, handX=400, handY=400;
+let eggs=[], particles=[], sparks=[], trail=[];
+let shakeT=0, combo=0, lastCatch=0;
+let bonusActive=false, bonusTimer=0;
+let frenzyActive=false, frenzyTimer=0;
+let shieldCount=0, bombCount=0;
+let eggTimer=0, currentTab='hand';
+let godMode=false, megaMagnetActive=false;
+
+// ── Upgrades ──
+const UPG={
+  hand:[
+    {id:'hand_size', name:'Розмір руки',    icon:'🤚', desc:'Більша рука — ловить більше, але падає більше яєць.',       baseCost:20,level:0,maxLevel:8,  eff:u=>`+${u.level*15}% розмір`,  color:'#2196f3', unlockLevel:1},
+    {id:'hand_speed',name:'Швидкість руки', icon:'💨', desc:'Рука швидше слідує за курсором.',                        baseCost:30,level:0,maxLevel:6,  eff:u=>`+${u.level*10}% швидк`,  color:'#00bcd4', unlockLevel:1},
+    {id:'hand_trail',name:'Слід від руки',  icon:'✨', desc:'Залишає мерехтливий слід при швидкому русі.',            baseCost:25,level:0,maxLevel:4,  eff:u=>`Рівень ${u.level}/4`,     color:'#9c27b0', unlockLevel:2},
+    {id:'mega_hand', name:'Мега рука',      icon:'🖐️', desc:'Гігантська рука, яка ловить все!',                        baseCost:200,level:0,maxLevel:3, eff:u=>`+${u.level*30}% розмір`,  color:'#ff5722', unlockLevel:15},
+  ],
+  egg:[
+    {id:'egg_value', name:'Золоте яйце',    icon:'🥚', desc:'Кожне спіймане яйце дає більше монет.',                  baseCost:30,level:0,maxLevel:8,  eff:u=>`+${u.level} монет/яйце`, color:'#f5c842', unlockLevel:1},
+    {id:'egg_double',name:'Подвійний шанс', icon:'🍳', desc:'Шанс що яйце дасть подвійні монети.',                  baseCost:40,level:0,maxLevel:5,  eff:u=>`${u.level*15}% шанс`,    color:'#ff9800', unlockLevel:2},
+    {id:'egg_rainbow',name:'Веселкове яйце',icon:'🌈', desc:'Рідкісне веселкове яйце дає 10+ монет!',               baseCost:55,level:0,maxLevel:4,  eff:u=>`${u.level*8}% шанс`,     color:'#e91e63', unlockLevel:5},
+    {id:'egg_slow',  name:'Повільні яйця',  icon:'🐢', desc:'Яйця падають повільніше — простіше ловити.',            baseCost:35,level:0,maxLevel:6,  eff:u=>`-${u.level*8}% швидк`,   color:'#4caf50', unlockLevel:1},
+    {id:'egg_diamond',name:'Діамантове яйце',icon:'💎',desc:'Супер-рідкісне яйце дає 25+ монет!',                   baseCost:100,level:0,maxLevel:3, eff:u=>`${u.level*5}% шанс`,     color:'#00bcd4', unlockLevel:10},
+  ],
+  power:[
+    {id:'x2_coins',  name:'2× Монети 60с', icon:'💰', desc:'Всі монети × 2 на 60 секунд.',                          baseCost:50,level:0,maxLevel:5,  eff:u=>`${u.level} раз куплено`, color:'#ff5722', unlockLevel:1},
+    {id:'magnet',    name:'Магніт',        icon:'🧲', desc:'Притягує яйця до руки автоматично.',                   baseCost:45,level:0,maxLevel:5,  eff:u=>`Сила: ${u.level*2}`,     color:'#607d8b', unlockLevel:4},
+    {id:'shield',    name:'Щит',           icon:'🛡️', desc:'Захищає від одного великого яйця.',                     baseCost:60,level:0,maxLevel:4,  eff:u=>`${shieldCount} активних`,color:'#1565c0', unlockLevel:3},
+    {id:'bomb',      name:'Бомба',         icon:'💣', desc:'Знищує всі яйця на екрані + монети.',                  baseCost:70,level:0,maxLevel:4,  eff:u=>`${bombCount} бомб`,      color:'#212121', unlockLevel:6},
+  ],
+  gloves:[
+    {id:'glove_basic',name:'Базова рукавиця',icon:'🧤',desc:'Проста червона рукавиця.',                            baseCost:40,level:0,maxLevel:1,  eff:u=>u.level?'✅ Активно':'',   color:'#e53935', unlockLevel:3},
+    {id:'glove_gold', name:'Золота рукавиця',icon:'✨',desc:'Блискуча золота рукавиця. +5% монет.',                baseCost:80,level:0,maxLevel:1,  eff:u=>u.level?'✅ +5% монет':'', color:'#ffd700', unlockLevel:7},
+    {id:'glove_ice',  name:'Крижана рукавиця',icon:'❄️',desc:'Заморожує яйця на 0.5с при дотику.',                baseCost:100,level:0,maxLevel:1, eff:u=>u.level?'✅ Активно':'',   color:'#00bcd4', unlockLevel:10},
+    {id:'glove_fire', name:'Вогняна рукавиця',icon:'🔥',desc:'Знищує малі яйця при дотику. +10% монет.',          baseCost:150,level:0,maxLevel:1, eff:u=>u.level?'✅ +10% монет':'',color:'#ff5722', unlockLevel:12},
+    {id:'glove_rainbow',name:'Веселкова рукавиця',icon:'🌈',desc:'Змінює колір! +15% до всіх бонусів.',          baseCost:200,level:0,maxLevel:1, eff:u=>u.level?'✅ +15% бонус':'',color:'#9c27b0', unlockLevel:15},
+  ],
+  special:[
+    {id:'lucky',     name:'Удача',         icon:'🍀', desc:'Випадковий шанс на подвійні монети.',                   baseCost:40,level:0,maxLevel:6,  eff:u=>`${u.level*8}% шанс`,     color:'#4caf50', unlockLevel:2},
+    {id:'frenzy',    name:'Френезі 30с',   icon:'🔥', desc:'30 секунд: x3 монети + магніт.',                       baseCost:80,level:0,maxLevel:3,  eff:u=>`${u.level} раз куплено`, color:'#ff5722', unlockLevel:8},
+    {id:'ghost',     name:'Рука-Привид',   icon:'👻', desc:'Рука стає напівпрозорою та моторошною.',              baseCost:35,level:0,maxLevel:1,  eff:u=>u.level?'✅ Активно':'',   color:'#9c27b0', unlockLevel:10},
+    {id:'streak_x',  name:'Серія Бонус',   icon:'🔗', desc:'Combo 5+ додає +25% монет за кожен рівень.',          baseCost:55,level:0,maxLevel:4,  eff:u=>`+${u.level*25}% при combo`,color:'#ff9800', unlockLevel:5},
+    {id:'auto_catch',name:'Авто-збір',     icon:'🤖', desc:'Автоматично ловить яйця поруч.',                       baseCost:120,level:0,maxLevel:3, eff:u=>`Радіус: ${u.level*20}`,  color:'#2196f3', unlockLevel:12},
+  ]
+};
+
+function allU(){ return [...UPG.hand,...UPG.egg,...UPG.power,...UPG.gloves,...UPG.special,...DB.customItems]; }
+function getLvl(id){ return (allU().find(u=>u.id===id)||{level:0}).level; }
+function getCostU(u){ return u.baseCost+u.level*10; }
+
+function getHandW(){ 
+  let base = 66*(1+getLvl('hand_size')*0.15);
+  base *= (1+getLvl('mega_hand')*0.3);
+  return base;
+}
+function getHandH(){ 
+  let base = 78*(1+getLvl('hand_size')*0.15);
+  base *= (1+getLvl('mega_hand')*0.3);
+  return base;
+}
+function getLerp(){ return 0.15+getLvl('hand_speed')*0.04; }
+function getMag(){ 
+  let mag = getLvl('magnet')*1.9+(frenzyActive?3.5:0);
+  if (megaMagnetActive) mag += 10;
+  return mag;
+}
+function getSlowMul(){ return 1-getLvl('egg_slow')*0.08; }
+
+function getActiveGlove() {
+  if (getLvl('glove_rainbow')) return 'rainbow';
+  if (getLvl('glove_fire')) return 'fire';
+  if (getLvl('glove_ice')) return 'ice';
+  if (getLvl('glove_gold')) return 'gold';
+  if (getLvl('glove_basic')) return 'basic';
+  return null;
+}
+
+function getCoinPerEgg(egg){
+  let base=egg.diamond?25:egg.rainbow?10:egg.big?3:1;
+  base+=getLvl('egg_value');
+  if(Math.random()<getLvl('egg_double')*0.15) base*=2;
+  if(bonusActive||frenzyActive) base*=(frenzyActive?3:2);
+  if(Math.random()<getLvl('lucky')*0.08) base*=2;
+  if(combo>=5&&getLvl('streak_x')>0) base=Math.round(base*(1+getLvl('streak_x')*0.25));
+  
+  // Glove bonuses
+  const glove = getActiveGlove();
+  if (glove === 'gold') base *= 1.05;
+  if (glove === 'fire') base *= 1.1;
+  if (glove === 'rainbow') base *= 1.15;
+  
+  // Event bonuses
+  if (DB.activeEvent?.type === 'double_coins') base *= 2;
+  if (DB.activeEvent?.type === 'coin_rain') base *= 1.5;
+  
+  return Math.round(base);
+}
+
+// ── Eggs ──
+function spawnEgg(){
+  const hw=getHandW();
+  const extra=Math.floor(getLvl('hand_size')/2);
+  
+  // Event modifications
+  let spawnCount = 1 + extra;
+  if (DB.activeEvent?.type === 'mega_eggs') spawnCount = 1;
+  if (DB.activeEvent?.type === 'coin_rain') spawnCount += 2;
+  
+  for(let e=0;e<spawnCount;e++){
+    const x=55+Math.random()*(canvas.width-110);
+    let bs=1.55+Math.random()*1.7+getLvl('hand_size')*0.22;
+    
+    if (DB.activeEvent?.type === 'speed_run') bs *= 1.8;
+    
+    const sp=bs*getSlowMul();
+    
+    let isRed=Math.random()<0.055;
+    let isBig=Math.random()<0.09+getLvl('hand_size')*0.018;
+    let isRainbow=Math.random()<getLvl('egg_rainbow')*0.08;
+    let isDiamond=Math.random()<getLvl('egg_diamond')*0.05;
+    
+    // Event modifications
+    if (DB.activeEvent?.type === 'golden_hour') {
+      isRed = false;
+      isBig = Math.random() < 0.3;
+    }
+    if (DB.activeEvent?.type === 'rainbow_fest') {
+      isRainbow = Math.random() < 0.4;
+    }
+    if (DB.activeEvent?.type === 'mega_eggs') {
+      isBig = true;
+      isRed = Math.random() < 0.3;
+    }
+    
+    const r=isDiamond?28:isBig?hw*0.65:isRainbow?22:16+Math.random()*14;
+    eggs.push({x,y:-r*2.5,r,sp,isRed,big:isBig,rainbow:isRainbow,diamond:isDiamond,caught:false,
+      wobble:Math.random()*Math.PI*2, wobbleSp:0.055+Math.random()*0.06,
+      rot:Math.random()*Math.PI*2, vx:(Math.random()-0.5)*0.6, frozen:0});
+  }
+}
+
+// ── Particles ──
+function burst(x,y,col,n=12,big=false){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, sp=(big?3:1.5)+Math.random()*(big?6:4);
+    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2.5,life:1,col,r:(big?7:3.5)+Math.random()*3,star:Math.random()<0.3});
+  }
+}
+function sparkBurst(x,y,n=18){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, sp=2.5+Math.random()*8;
+    sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,life:1,len:6+Math.random()*14});
+  }
+}
+
+// ── DRAW HAND ──
+function drawHand(x,y,w,h){
+  const glove = getActiveGlove();
+  const ghost = getLvl('ghost')>=1;
+  
+  let skinCol, darkCol, nailCol;
+  
+  if (glove === 'rainbow') {
+    const hue = (Date.now() * 0.1) % 360;
+    skinCol = `hsl(${hue}, 80%, 60%)`;
+    darkCol = `hsl(${hue}, 80%, 40%)`;
+    nailCol = `hsl(${(hue + 180) % 360}, 80%, 80%)`;
+  } else if (glove === 'fire') {
+    skinCol = '#ff5722';
+    darkCol = '#bf360c';
+    nailCol = '#ffeb3b';
+  } else if (glove === 'ice') {
+    skinCol = '#81d4fa';
+    darkCol = '#0288d1';
+    nailCol = '#e1f5fe';
+  } else if (glove === 'gold') {
+    skinCol = '#ffd700';
+    darkCol = '#ff8f00';
+    nailCol = '#fff8e1';
+  } else if (glove === 'basic') {
+    skinCol = '#e53935';
+    darkCol = '#6a0000';
+    nailCol = '#922b21';
+  } else if (ghost) {
+    skinCol = 'rgba(200,215,255,0.58)';
+    darkCol = 'rgba(160,180,255,0.4)';
+    nailCol = 'rgba(190,205,255,0.7)';
+  } else {
+    skinCol = '#f0c27a';
+    darkCol = '#d4956b';
+    nailCol = '#ffe0cc';
+  }
+
+  ctx.save(); ctx.translate(x,y);
+
+  ctx.shadowColor='rgba(0,0,0,0.14)'; ctx.shadowBlur=20; ctx.shadowOffsetY=10;
+
+  const pw=w*0.7, ph=h*0.58;
+  const pg=ctx.createRadialGradient(-pw*0.1,-ph*0.12,pw*0.08,pw*0.06,ph*0.06,pw*0.78);
+  if(ghost){
+    pg.addColorStop(0,'rgba(220,230,255,0.72)'); pg.addColorStop(1,'rgba(150,175,255,0.3)');
+  } else {
+    pg.addColorStop(0, glove ? skinCol : '#ffd898');
+    pg.addColorStop(0.55,skinCol); pg.addColorStop(1,darkCol);
+  }
+  ctx.fillStyle=pg;
+  ctx.beginPath();
+  ctx.moveTo(-pw*0.42,ph*0.36);
+  ctx.bezierCurveTo(-pw*0.52,-ph*0.14,-pw*0.46,-ph*0.56,0,-ph*0.58);
+  ctx.bezierCurveTo(pw*0.46,-ph*0.56,pw*0.52,-ph*0.14,pw*0.42,ph*0.36);
+  ctx.bezierCurveTo(pw*0.3,ph*0.55,0,ph*0.62,-pw*0.3,ph*0.55);
+  ctx.closePath(); ctx.fill();
+
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  const fdata=[
+    {ox:-pw*0.34,oy:-ph*0.49,len:h*0.37,ang:-0.22,fw:w*0.088},
+    {ox:-pw*0.11,oy:-ph*0.56,len:h*0.47,ang:-0.06,fw:w*0.092},
+    {ox: pw*0.12,oy:-ph*0.58,len:h*0.49,ang: 0.05,fw:w*0.090},
+    {ox: pw*0.33,oy:-ph*0.51,len:h*0.42,ang: 0.19,fw:w*0.085},
+  ];
+  fdata.forEach(f=>{
+    ctx.save(); ctx.translate(f.ox,f.oy); ctx.rotate(f.ang);
+    const fg=ctx.createLinearGradient(-f.fw,0,f.fw*2,-f.len);
+    if(ghost){ fg.addColorStop(0,'rgba(170,190,255,0.5)'); fg.addColorStop(1,'rgba(200,215,255,0.2)'); }
+    else { fg.addColorStop(0,darkCol); fg.addColorStop(0.45,skinCol); fg.addColorStop(1,darkCol); }
+    ctx.fillStyle=fg;
+    ctx.beginPath();
+    ctx.moveTo(-f.fw,0);
+    ctx.bezierCurveTo(-f.fw*1.1,-f.len*0.3,-f.fw*0.95,-f.len*0.85,-f.fw*0.4,-f.len);
+    ctx.bezierCurveTo(0,-f.len*1.07,f.fw*0.4,-f.len,f.fw*0.95,-f.len*0.85);
+    ctx.bezierCurveTo(f.fw*1.1,-f.len*0.3,f.fw,0,f.fw,0);
+    ctx.closePath(); ctx.fill();
+    if(!ghost){
+      ctx.strokeStyle=darkCol; ctx.lineWidth=0.8; ctx.globalAlpha=0.4;
+      [-f.len*0.23,-f.len*0.45].forEach(ky=>{ctx.beginPath();ctx.moveTo(-f.fw*0.5,ky);ctx.lineTo(f.fw*0.5,ky);ctx.stroke();});
+      ctx.globalAlpha=1;
+    }
+    ctx.fillStyle=nailCol;
+    ctx.beginPath(); ctx.ellipse(0,-f.len*0.9,f.fw*0.46,f.len*0.1,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+
+  ctx.save(); ctx.translate(-pw*0.48,ph*0.05); ctx.rotate(-0.72);
+  const tg=ctx.createLinearGradient(-w*0.1,0,w*0.1,-h*0.22);
+  if(ghost){ tg.addColorStop(0,'rgba(170,190,255,0.5)'); tg.addColorStop(1,'rgba(200,215,255,0.2)'); }
+  else { tg.addColorStop(0,darkCol); tg.addColorStop(0.5,skinCol); tg.addColorStop(1,darkCol); }
+  ctx.fillStyle=tg;
+  ctx.beginPath();
+  ctx.moveTo(-w*0.09,0);
+  ctx.bezierCurveTo(-w*0.11,-h*0.08,-w*0.08,-h*0.20,0,-h*0.23);
+  ctx.bezierCurveTo(w*0.08,-h*0.20,w*0.11,-h*0.08,w*0.09,0);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle=nailCol; ctx.beginPath(); ctx.ellipse(0,-h*0.185,w*0.053,h*0.027,0,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  if(ghost){
+    ctx.globalAlpha=0.18+Math.sin(Date.now()*0.004)*0.08;
+    ctx.fillStyle='rgba(180,210,255,0.7)';
+    ctx.beginPath(); ctx.ellipse(0,0,pw*0.82,ph*0.72,0,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  if(frenzyActive){
+    ctx.globalAlpha=0.22+Math.sin(Date.now()*0.01)*0.12;
+    ctx.fillStyle='#ff5722';
+    ctx.beginPath(); ctx.ellipse(0,-ph*0.1,pw*0.9,ph*0.8,0,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  
+  // God mode aura
+  if(godMode){
+    ctx.globalAlpha=0.3+Math.sin(Date.now()*0.008)*0.15;
+    const glow = ctx.createRadialGradient(0,0,0,0,0,pw);
+    glow.addColorStop(0,'rgba(255,215,0,0.8)');
+    glow.addColorStop(1,'rgba(255,215,0,0)');
+    ctx.fillStyle=glow;
+    ctx.beginPath(); ctx.arc(0,0,pw,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  ctx.restore();
+}
+
+// ── DRAW EGG ──
+function drawEgg(egg){
+  ctx.save();
+  ctx.translate(egg.x,egg.y);
+  egg.wobble+=egg.wobbleSp;
+  ctx.rotate(Math.sin(egg.wobble)*0.09);
+
+  const r=egg.r;
+  ctx.fillStyle='rgba(0,0,0,0.07)';
+  ctx.beginPath(); ctx.ellipse(0,r*0.62,r*0.72,r*0.2,0,0,Math.PI*2); ctx.fill();
+
+  let grd;
+  if(egg.diamond){
+    grd=ctx.createRadialGradient(-r*0.28,-r*0.3,r*0.04,0,0,r*1.15);
+    grd.addColorStop(0,'#e1f5fe'); grd.addColorStop(0.4,'#81d4fa'); grd.addColorStop(0.8,'#0288d1'); grd.addColorStop(1,'#01579b');
+  } else if(egg.rainbow){
+    grd=ctx.createLinearGradient(-r,-r,r,r);
+    ['#ff4b8b','#ff9800','#ffeb3b','#4caf50','#2196f3','#9c27b0','#ff4b8b'].forEach((c,i)=>grd.addColorStop(i/6,c));
+  } else if(egg.isRed){
+    grd=ctx.createRadialGradient(-r*0.28,-r*0.3,r*0.04,r*0.05,0,r*1.1);
+    grd.addColorStop(0,'#ff8a80'); grd.addColorStop(0.45,'#e53935'); grd.addColorStop(1,'#5d0000');
+  } else if(egg.big){
+    grd=ctx.createRadialGradient(-r*0.28,-r*0.3,r*0.04,0,0,r*1.15);
+    grd.addColorStop(0,'#fffde7'); grd.addColorStop(0.4,'#ffd54f'); grd.addColorStop(0.8,'#ff8f00'); grd.addColorStop(1,'#e65100');
+  } else {
+    grd=ctx.createRadialGradient(-r*0.3,-r*0.32,r*0.04,0,0,r*1.1);
+    grd.addColorStop(0,'#fffde7'); grd.addColorStop(0.45,'#fff8e1'); grd.addColorStop(0.85,'#ffe082'); grd.addColorStop(1,'#f9a825');
+  }
+
+  ctx.save(); ctx.scale(0.82,1);
+  ctx.beginPath();
+  ctx.moveTo(0,-r);
+  ctx.bezierCurveTo(r*0.72,-r,r*0.88,-r*0.38,r*0.88,r*0.1);
+  ctx.bezierCurveTo(r*0.88,r*0.66,r*0.52,r,0,r);
+  ctx.bezierCurveTo(-r*0.52,r,-r*0.88,r*0.66,-r*0.88,r*0.1);
+  ctx.bezierCurveTo(-r*0.88,-r*0.38,-r*0.72,-r,0,-r);
+  ctx.closePath();
+  ctx.fillStyle=grd; ctx.fill();
+
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.beginPath(); ctx.ellipse(-r*0.2,-r*0.28,r*0.27,r*0.16,Math.PI/5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.ellipse(r*0.14,r*0.16,r*0.14,r*0.09,-Math.PI/6,0,Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle=egg.isRed?'rgba(100,0,0,0.2)':egg.big?'rgba(120,60,0,0.18)':'rgba(180,140,0,0.15)';
+  ctx.lineWidth=r*0.06;
+  ctx.beginPath();
+  ctx.moveTo(0,-r);
+  ctx.bezierCurveTo(r*0.72,-r,r*0.88,-r*0.38,r*0.88,r*0.1);
+  ctx.bezierCurveTo(r*0.88,r*0.66,r*0.52,r,0,r);
+  ctx.bezierCurveTo(-r*0.52,r,-r*0.88,r*0.66,-r*0.88,r*0.1);
+  ctx.bezierCurveTo(-r*0.88,-r*0.38,-r*0.72,-r,0,-r);
+  ctx.stroke();
+  ctx.restore();
+
+  if(egg.diamond||egg.rainbow||egg.big||egg.isRed){
+    ctx.font=`bold ${r*0.6}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(egg.diamond?'💎':egg.rainbow?'🌈':egg.big?'💰':'❗',0,0);
+  }
+
+  if(egg.rainbow||egg.diamond){
+    ctx.globalAlpha=0.18+Math.sin(Date.now()*0.006+egg.wobble)*0.12;
+    const rg=ctx.createRadialGradient(0,0,r*0.5,0,0,r*1.3);
+    rg.addColorStop(0,'rgba(255,255,255,0)');
+    rg.addColorStop(1,`hsl(${(Date.now()*0.2)%360},100%,70%)`);
+    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(0,0,r*1.3,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  
+  // Frozen effect
+  if(egg.frozen > 0){
+    ctx.globalAlpha=0.5;
+    ctx.fillStyle='rgba(129,212,250,0.6)';
+    ctx.beginPath(); ctx.arc(0,0,r*1.1,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  
+  ctx.restore();
+}
+
+function drawStar(cx,cy,n,R,r){
+  let a=-Math.PI/2, step=Math.PI/n;
+  ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+  for(let i=0;i<n;i++){
+    a+=step; ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    a+=step; ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+  }
+  ctx.closePath(); ctx.fill();
+}
+
+// ── MAIN LOOP ──
+function loop(){
+  if(!gameRunning) return;
+  const hw=getHandW(), hh=getHandH();
+  let sx=0,sy=0;
+  if(shakeT>0){ sx=(Math.random()*2-1)*shakeT*5; sy=(Math.random()*2-1)*shakeT*4; shakeT-=0.15; }
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save(); ctx.translate(sx,sy);
+
+  const lr=getLerp();
+  handX+=(targetX-handX)*lr; handY+=(targetY-handY)*lr;
+  trail.unshift({x:handX,y:handY}); if(trail.length>14) trail.pop();
+
+  if(getLvl('hand_trail')>0){
+    trail.forEach((t,i)=>{
+      const a=(1-i/trail.length)*0.18*getLvl('hand_trail');
+      ctx.globalAlpha=a;
+      ctx.fillStyle=frenzyActive?`hsl(${(i*20)%360},100%,60%)`:'rgba(100,180,255,0.8)';
+      const rs=(1-i/trail.length)*hw*0.38;
+      ctx.beginPath(); ctx.arc(t.x,t.y-hh*0.3,Math.max(rs,2),0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1;
+  }
+
+  const mg=getMag();
+  if(mg>0){
+    eggs.forEach(egg=>{
+      if(egg.caught) return;
+      const dx=handX-egg.x, dy=handY-egg.y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<310){ egg.x+=(dx/d)*mg*0.7; egg.y+=(dy/d)*mg*0.4; }
+    });
+  }
+  
+  // Auto-catch
+  const autoCatchRadius = getLvl('auto_catch') * 20;
+  if(autoCatchRadius > 0){
+    eggs.forEach(egg=>{
+      if(egg.caught || egg.big) return;
+      const dx=handX-egg.x, dy=handY-egg.y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d < hw*0.5 + autoCatchRadius){
+        egg.x = handX;
+        egg.y = handY;
+      }
+    });
+  }
+
+  eggTimer++;
+  let spawnRate = 105;
+  if (DB.activeEvent?.type === 'speed_run') spawnRate = 50;
+  if (DB.activeEvent?.type === 'coin_rain') spawnRate = 70;
+  if(eggTimer>spawnRate){ eggTimer=0; spawnEgg(); }
+
+  for(let i=eggs.length-1;i>=0;i--){
+    const egg=eggs[i];
+    
+    // Frozen slowdown
+    if(egg.frozen > 0){
+      egg.frozen--;
+      egg.y += egg.sp * 0.2;
+    } else {
+      egg.y+=egg.sp;
+    }
+    egg.x+=egg.vx;
+    
+    if(egg.caught){eggs.splice(i,1);continue;}
+    const dx=egg.x-handX, dy=egg.y-handY;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<hw*0.54+egg.r*0.65){
+      // Ice glove effect
+      if(getActiveGlove() === 'ice' && !egg.big){
+        egg.frozen = 30;
+      }
+      
+      // Fire glove - destroy small eggs
+      if(getActiveGlove() === 'fire' && !egg.big && !egg.rainbow && !egg.diamond){
+        egg.caught = true;
+        const earned = getCoinPerEgg(egg);
+        coins += earned;
+        updateCoinDisplay();
+        burst(egg.x,egg.y,'#ff5722',15,false);
+        showFloat(egg.x,egg.y,'🔥+'+earned,'#ff5722');
+        sfxCatch(false,false,false);
+        eggs.splice(i,1);
+        continue;
+      }
+      
+      if(egg.big&&egg.r*2>hw*0.9&&!godMode){
+        if(shieldCount>0){
+          shieldCount--; egg.caught=true;
+          burst(egg.x,egg.y,'#1565c0',22,true); sparkBurst(egg.x,egg.y);
+          showFloat(egg.x,egg.y,'🛡️ ЗАХИСТ!','#64b5f6'); sfxCatch(false,true,false); shakeT=3;
+          eggs.splice(i,1);
+        } else { gameOver(); return; }
+        continue;
+      }
+      egg.caught=true;
+      const earned=getCoinPerEgg(egg); coins+=earned; updateCoinDisplay();
+      const now=Date.now(); combo=(now-lastCatch<1800)?combo+1:1; lastCatch=now;
+      updateCombo();
+      
+      // XP gain
+      LEVELS.addXP(earned);
+      
+      const fc=egg.diamond?'#00bcd4':egg.rainbow?'#e91e63':egg.isRed?'#e53935':egg.big?'#ff8f00':'#f5c842';
+      burst(egg.x,egg.y,fc,egg.big?22:13,egg.big||egg.rainbow||egg.diamond);
+      if(combo>=3||egg.rainbow||egg.diamond) sparkBurst(egg.x,egg.y);
+      showFloat(egg.x,egg.y,'+'+(frenzyActive?'🔥':bonusActive?'⚡':'')+earned,(earned>=8?'#ff5722':earned>=4?'#ff9800':'#ffe000'));
+      sfxCatch(egg.isRed,egg.big,egg.rainbow);
+      if(combo>=3) sfxCombo(Math.min(combo,5));
+      if(egg.big||egg.rainbow||egg.diamond) shakeT=2;
+      eggs.splice(i,1); continue;
+    }
+    if(egg.y>canvas.height+90){ if(!egg.big){combo=Math.max(0,combo-1);updateCombo();sfxMiss();} eggs.splice(i,1); }
+  }
+  eggs.forEach(e=>drawEgg(e));
+
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.18; p.life-=0.03;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    ctx.globalAlpha=p.life; ctx.fillStyle=p.col;
+    if(p.star) drawStar(p.x,p.y,5,p.r,p.r*0.42);
+    else { ctx.beginPath(); ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2); ctx.fill(); }
+  }
+
+  for(let i=sparks.length-1;i>=0;i--){
+    const s=sparks[i];
+    s.x+=s.vx; s.y+=s.vy; s.vy+=0.25; s.life-=0.04;
+    if(s.life<=0){sparks.splice(i,1);continue;}
+    ctx.globalAlpha=s.life;
+    ctx.strokeStyle=`hsl(${45+Math.random()*20},100%,${60+Math.random()*25}%)`;
+    ctx.lineWidth=2.2*s.life;
+    ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(s.x-s.vx*0.3*s.len,s.y-s.vy*0.3*s.len); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+
+  drawHand(handX,handY-hh*0.3,hw,hh);
+
+  if(shieldCount>0||godMode){
+    ctx.globalAlpha=0.5+Math.sin(Date.now()*0.006)*0.2;
+    ctx.strokeStyle=godMode?'#ffd700':'#42a5f5'; ctx.lineWidth=3; ctx.setLineDash([7,5]);
+    ctx.beginPath(); ctx.arc(handX,handY-hh*0.3,hw*0.85,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha=1;
+    if(!godMode){
+      ctx.font=`bold ${14}px Nunito`; ctx.fillStyle='#1565c0'; ctx.textAlign='center';
+      ctx.fillText('🛡️'+shieldCount,handX,handY-hh*0.3-hw*0.95);
+    }
+  }
+
+  if(bombCount>0){
+    ctx.font=`bold 13px Nunito`; ctx.fillStyle='#212121'; ctx.textAlign='right';
+    ctx.fillText('💣×'+bombCount, canvas.width-14, canvas.height-20);
+  }
+
+  if(bonusActive){ bonusTimer--; if(bonusTimer<=0){bonusActive=false;hideBonusPill();} }
+  if(frenzyActive){ frenzyTimer--; if(frenzyTimer<=0){frenzyActive=false;hideBonusPill();} }
+
+  ctx.restore();
+  animId=requestAnimationFrame(loop);
+}
+
+// ── INPUT ──
+canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();targetX=e.clientX-r.left;targetY=e.clientY-r.top;});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();targetX=e.touches[0].clientX-r.left;targetY=e.touches[0].clientY-r.top;},{passive:false});
+canvas.addEventListener('click',()=>initAudio());
+
+// ── UI HELPERS ──
+function updateCoinDisplay(){
+  document.getElementById('coin-count').textContent=coins;
+  const sv=document.getElementById('shop-coins-val');
+  if(sv) sv.textContent=coins;
+}
+function showFloat(x,y,text,color='#ffe000'){
+  const el=document.createElement('div'); el.className='flt'; el.textContent=text;
+  el.style.cssText=`left:${x-30}px;top:${y-50}px;color:${color};font-size:${1.15+Math.min(text.length*0.03,0.5)}rem;`;
+  document.getElementById('wrap').appendChild(el); setTimeout(()=>el.remove(),1200);
+}
+function updateCombo(){
+  const cd=document.getElementById('combo-display');
+  if(combo>=3){
+    const msgs=['','','','🔥 NICE!','🔥🔥 COOL!','⚡ SUPER!','💥 AMAZING!','🌟 GODLIKE!','👑 UNSTOPPABLE!'];
+    cd.style.display='block';
+    cd.textContent=msgs[Math.min(combo,8)]||(combo+'× COMBO!');
+    cd.style.color=combo>=6?'#e53935':combo>=4?'#ff9800':'#2196f3';
+  } else cd.style.display='none';
+  const sb=document.getElementById('streak-bar');
+  if(combo>0){sb.style.display='block';sb.textContent=`🔗 Серія: ×${combo}`;}
+  else sb.style.display='none';
+}
+function showBonusPill(t){ const b=document.getElementById('bonus-pill'); b.textContent=t; b.style.display='flex'; }
+function hideBonusPill(){ document.getElementById('bonus-pill').style.display='none'; }
+function announce(m){ const el=document.getElementById('announce'); el.textContent=m; el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',2200); }
+function flashScreen(col){ const f=document.getElementById('screen-flash'); f.style.background=col; f.style.opacity=1; setTimeout(()=>f.style.opacity=0,200); }
+
+// ── GLOBAL MESSAGE ──
+function showGlobalMessage(msg, duration = 10) {
+  const el = document.getElementById('global-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', duration * 1000);
+}
+
+function checkGlobalMessage() {
+  if (DB.globalMsg && Date.now() < DB.globalMsg.expires) {
+    showGlobalMessage(DB.globalMsg.text, Math.floor((DB.globalMsg.expires - Date.now()) / 1000));
+  }
+}
+
+// ── EVENT BANNER ──
+function updateEventBanner() {
+  const banner = document.getElementById('event-banner');
+  if (DB.activeEvent && Date.now() < DB.activeEvent.expires) {
+    const eventNames = {
+      double_coins: '💰 2× МОНЕТИ!',
+      golden_hour: '🌟 ЗОЛОТА ГОДИНА!',
+      rainbow_fest: '🌈 ВЕСЕЛКОВИЙ ФЕСТ!',
+      speed_run: '⚡ ШВИДКІСНИЙ РЕЖИМ!',
+      mega_eggs: '🥚 МЕГА ЯЙЦЯ!',
+      coin_rain: '💵 ДОЩ З МОНЕТ!'
+    };
+    banner.textContent = eventNames[DB.activeEvent.type] || DB.activeEvent.type;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+    DB.activeEvent = null;
+    DB.save();
+  }
+}
+setInterval(updateEventBanner, 1000);
+
+// ── GAME FLOW ──
+function startGame(){
+  initAudio();
+  eggs=[];particles=[];sparks=[];trail=[];
+  eggTimer=0;combo=0;lastCatch=0;shakeT=0;
+  bonusActive=false;bonusTimer=0;frenzyActive=false;frenzyTimer=0;
+  shieldCount=getLvl('shield'); bombCount=getLvl('bomb');
+  
+  // Load user upgrades
+  if (DB.currentUser?.upgrades) {
+    allU().forEach(u => {
+      if (DB.currentUser.upgrades[u.id] !== undefined) {
+        u.level = DB.currentUser.upgrades[u.id];
+      }
+    });
+    shieldCount = getLvl('shield');
+    bombCount = getLvl('bomb');
+  }
+  
+  document.getElementById('start-screen').style.display='none';
+  document.getElementById('go-screen').style.display='none';
+  document.getElementById('hud').style.display='flex';
+  document.getElementById('timer-pill').style.display='none';
+  
+  // Show admin button if admin
+  document.getElementById('admin-btn').style.display = DB.currentUser?.isAdmin ? 'flex' : 'none';
+  
+  hideBonusPill(); updateCoinDisplay(); updateCombo(); updateLevelDisplay();
+  checkGlobalMessage();
+  gameRunning=true; loop();
+}
+
+function gameOver(){
+  gameRunning=false; cancelAnimationFrame(animId);
+  sfxGameOver(); flashScreen('rgba(229,57,53,0.65)'); shakeT=10;
+  
+  if(coins>bestCoins) bestCoins=coins;
+  
+  // Save to user
+  if (DB.currentUser) {
+    DB.currentUser.gamesPlayed++;
+    DB.currentUser.totalCoins += coins;
+    if (coins > DB.currentUser.bestScore) {
+      DB.currentUser.bestScore = coins;
+    }
+    DB.currentUser.coins += coins;
+    
+    // Save upgrades
+    const upgrades = {};
+    allU().forEach(u => upgrades[u.id] = u.level);
+    DB.currentUser.upgrades = upgrades;
+    
+    DB.updateUser(DB.currentUser);
+    DB.log('GAME_OVER', `Score: ${coins}, Best: ${DB.currentUser.bestScore}`);
+  }
+  
+  document.getElementById('go-sub').textContent=`Монет зібрано: ${coins} 🪙`;
+  document.getElementById('go-level').textContent=`Рівень: ${DB.currentUser?.level || 1}`;
+  document.getElementById('go-best').textContent=`Рекорд: ${DB.currentUser?.bestScore || bestCoins} 🏆`;
+  document.getElementById('go-emoji').textContent=coins>80?'😱💥':coins>40?'😮💥':'💥🥚';
+  document.getElementById('go-screen').style.display='flex';
+  document.getElementById('hud').style.display='none';
+}
+
+// ── SHOP ──
+function renderShop(tab){
+  currentTab=tab||currentTab;
+  document.getElementById('shop-coins-val').textContent=DB.currentUser?.coins || coins;
+  document.querySelectorAll('#shop-modal .shop-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===currentTab));
+  const grid=document.getElementById('shop-grid'); grid.innerHTML='';
+  
+  let items = UPG[currentTab] || [];
+  if (currentTab === 'special') {
+    items = [...items, ...DB.customItems.filter(i => i.category === 'special')];
+  }
+  if (currentTab === 'gloves') {
+    items = [...items, ...DB.customItems.filter(i => i.category === 'gloves')];
+  }
+  
+  const userLevel = DB.currentUser?.level || 1;
+  const userCoins = DB.currentUser?.coins || coins;
+  
+  items.forEach((upg,idx)=>{
+    const cost=getCostU(upg), maxed=upg.level>=upg.maxLevel, canBuy=!maxed&&userCoins>=cost;
+    const unlocked = !upg.unlockLevel || userLevel >= upg.unlockLevel;
+    const pct=(upg.level/upg.maxLevel*100).toFixed(0);
+    
+    let note='';
+    if(upg.id==='shield'&&shieldCount>0) note=`<span style="font-size:.76rem;color:#1565c0">🛡️ ${shieldCount} активних</span>`;
+    if(upg.id==='bomb'&&bombCount>0) note=`<span style="font-size:.76rem;color:#212121">💣 ${bombCount} готових</span>`;
+    
+    const div=document.createElement('div');
+    div.className='shop-item'+(maxed?' maxed':'')+(unlocked?'':' locked');
+    div.innerHTML=`
+      <div class="shop-icon">${upg.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${upg.name}</div>
+        <div class="shop-desc">${upg.desc}</div>
+        ${!unlocked ? `<div class="shop-unlock">🔒 Потрібен рівень ${upg.unlockLevel}</div>` : ''}
+        ${note}
+        <div class="shop-level-bar"><div class="shop-level-fill" style="width:${pct}%;background:${upg.color}"></div></div>
+        <div class="shop-level-text">Рівень ${upg.level}/${upg.maxLevel} · ${upg.eff(upg)}</div>
+      </div>
+      <button class="shop-buy ${maxed?'maxed-btn':''}" ${!canBuy||!unlocked?'disabled':''} data-idx="${idx}">
+        ${maxed?'✅ MAX':`🪙 ${cost}`}
+      </button>`;
+    grid.appendChild(div);
+  });
+  
+  grid.querySelectorAll('.shop-buy').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      let items = UPG[currentTab] || [];
+      if (currentTab === 'special') items = [...items, ...DB.customItems.filter(i => i.category === 'special')];
+      if (currentTab === 'gloves') items = [...items, ...DB.customItems.filter(i => i.category === 'gloves')];
+      
+      const upg=items[parseInt(btn.dataset.idx)];
+      const cost=getCostU(upg);
+      const userCoins = DB.currentUser?.coins || coins;
+      
+      if(userCoins<cost||upg.level>=upg.maxLevel) return;
+      
+      if (DB.currentUser) {
+        DB.currentUser.coins -= cost;
+        DB.updateUser({ coins: DB.currentUser.coins });
+      } else {
+        coins -= cost;
+      }
+      
+      upg.level++; sfxBuy();
+      
+      if(upg.id==='x2_coins'){
+        bonusActive=true; bonusTimer=60*60;
+        showBonusPill('⚡ 2× Монети!'); announce('⚡ 2× Монети на 60 секунд!');
+        sfxBonus(); startCountdown(60);
+      }
+      if(upg.id==='frenzy'){
+        frenzyActive=true; frenzyTimer=30*60;
+        showBonusPill('🔥 ФРЕНЕЗІ!'); announce('🔥 Френезі! 3× монети на 30с!');
+        sfxBonus(); flashScreen('rgba(255,87,34,0.38)'); startCountdown(30);
+      }
+      if(upg.id==='shield'){ shieldCount+=upg.level; announce(`🛡️ Щит (${shieldCount}) активовано!`); }
+      if(upg.id==='bomb'){
+        bombCount+=upg.level; announce(`💣 Бомба (${bombCount}) готова!`);
+        if(gameRunning){
+          eggs.forEach(e=>{ if(!e.big) { if(DB.currentUser) DB.currentUser.coins+=1; else coins+=1; } burst(e.x,e.y,'#ff5722',12,true); });
+          eggs=[]; sfxBomb(); flashScreen('rgba(255,82,0,0.5)'); shakeT=7; bombCount--;
+        }
+      }
+      
+      updateCoinDisplay(); renderShop(currentTab);
+      DB.log('PURCHASE', `${upg.name} (level ${upg.level})`);
+    });
+  });
+}
+
+let cdownId=null;
+function startCountdown(sec){
+  clearInterval(cdownId);
+  const pill=document.getElementById('timer-pill'); pill.style.display='flex';
+  document.getElementById('timer-val').textContent=sec+'с';
+  cdownId=setInterval(()=>{
+    sec--; document.getElementById('timer-val').textContent=sec+'с';
+    if(sec<=0){clearInterval(cdownId);pill.style.display='none';}
+  },1000);
+}
+
+// ── LEADERBOARD ──
+function renderLeaderboard(){
+  const list = document.getElementById('lb-list');
+  list.innerHTML = '';
+  
+  const leaders = DB.getLeaderboard();
+  const currentName = DB.currentUser?.name;
+  
+  leaders.forEach((user, idx) => {
+    const div = document.createElement('div');
+    let classes = 'lb-item';
+    if (idx === 0) classes += ' top1';
+    else if (idx === 1) classes += ' top2';
+    else if (idx === 2) classes += ' top3';
+    if (user.name === currentName) classes += ' me';
+    if (user.isBanned) classes += ' banned';
+    
+    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+    
+    div.className = classes;
+    div.innerHTML = `
+      <div class="lb-rank">${medal}</div>
+      <div class="lb-name">${user.isAdmin1 ? '👑 ' : ''}${user.name}</div>
+      <div class="lb-score">🪙 ${user.bestScore}</div>
+      <div class="lb-level">⭐ ${user.level || 1}</div>
+    `;
+    list.appendChild(div);
+  });
+  
+  if (leaders.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:#666">Поки що немає гравців</div>';
+  }
+}
+
+// ── ADMIN FUNCTIONS ──
+function renderAdminUsers(search = '') {
+  const list = document.getElementById('admin-user-list');
+  list.innerHTML = '';
+  
+  Object.values(DB.users)
+    .filter(u => u.name.toLowerCase().includes(search.toLowerCase()))
+    .forEach(user => {
+      const div = document.createElement('div');
+      div.className = 'admin-user-item' + (user.isBanned ? ' banned' : '');
+      div.innerHTML = `
+        <div class="admin-user-name">${user.isAdmin1 ? '👑 ' : ''}${user.name}</div>
+        <div class="admin-user-coins">🪙 ${user.coins} | 🏆 ${user.bestScore} | ⭐ ${user.level || 1}</div>
+        <div class="admin-user-actions">
+          <button onclick="adminEditUser('${user.name}', 'coins')" style="background:#4caf50;color:#fff">+💰</button>
+          <button onclick="adminEditUser('${user.name}', 'level')" style="background:#2196f3;color:#fff">+⭐</button>
+          <button onclick="adminEditUser('${user.name}', 'ban')" style="background:${user.isBanned ? '#4caf50' : '#e53935'};color:#fff">${user.isBanned ? '✅' : '🚫'}</button>
+          <button onclick="adminEditUser('${user.name}', 'delete')" style="background:#212121;color:#fff">🗑️</button>
+          <button onclick="adminEditUser('${user.name}', 'admin')" style="background:#ff9800;color:#fff">👑</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+}
+
+function adminEditUser(name, action) {
+  const user = DB.users[name];
+  if (!user) return;
+  
+  switch(action) {
+    case 'coins':
+      const addCoins = parseInt(prompt('Скільки монет додати?', '100'));
+      if (!isNaN(addCoins)) {
+        user.coins += addCoins;
+        DB.log('ADMIN_COINS', `${name}: +${addCoins} монет`);
+      }
+      break;
+    case 'level':
+      const addLevels = parseInt(prompt('Скільки рівнів додати?', '1'));
+      if (!isNaN(addLevels)) {
+        user.level = (user.level || 1) + addLevels;
+        DB.log('ADMIN_LEVEL', `${name}: +${addLevels} рівнів`);
+      }
+      break;
+    case 'ban':
+      user.isBanned = !user.isBanned;
+      DB.log('ADMIN_BAN', `${name}: ${user.isBanned ? 'заблоковано' : 'розблоковано'}`);
+      break;
+    case 'delete':
+      if (confirm(`Видалити гравця ${name}?`)) {
+        delete DB.users[name];
+        DB.log('ADMIN_DELETE', `Видалено: ${name}`);
+      }
+      break;
+    case 'admin':
+      user.isAdmin = !user.isAdmin;
+      DB.log('ADMIN_PROMOTE', `${name}: ${user.isAdmin ? 'став адміном' : 'знято адміна'}`);
+      break;
+  }
+  
+  DB.save();
+  renderAdminUsers(document.getElementById('admin-search').value);
+}
+
+function sendBroadcast() {
+  const msg = document.getElementById('broadcast-msg').value;
+  const duration = parseInt(document.getElementById('broadcast-duration').value) || 10;
+  
+  if (!msg) return alert('Введіть повідомлення!');
+  
+  DB.globalMsg = {
+    text: msg,
+    expires: Date.now() + duration * 1000
+  };
+  DB.save();
+  DB.log('BROADCAST', msg);
+  
+  showGlobalMessage(msg, duration);
+  alert('Повідомлення відправлено!');
+}
+
+// Оновлення опису вибраної події
+const eventSelect = document.getElementById('event-select');
+if (eventSelect) {
+  eventSelect.addEventListener('change', () => {
+    const select = document.getElementById('event-select');
+    const selectedOption = select.options[select.selectedIndex];
+    const desc = selectedOption.getAttribute('data-desc') || '';
+    const descEl = document.getElementById('event-desc');
+    if (descEl) descEl.textContent = desc;
+  });
+}
+
+// Функція активації події (покращена)
+function activateEvent() {
+  const type = document.getElementById('event-select').value;
+  const duration = parseInt(document.getElementById('event-duration').value) || 5;
+  if (!type) {
+    alert('Оберіть подію!');
+    return;
+  }
+  if (duration < 1 || duration > 60) {
+    alert('Тривалість має бути від 1 до 60 хвилин');
+    return;
+  }
+  DB.activeEvent = {
+    type,
+    expires: Date.now() + duration * 60 * 1000
+  };
+  DB.save();
+  DB.log('EVENT_START', `${type} на ${duration} хв`);
+  
+  updateEventBanner();
+  sfxBonus();
+  alert('Подію активовано!');
+}
+
+// Функція зупинки події
+function stopEvent() {
+  DB.activeEvent = null;
+  DB.save();
+  DB.log('EVENT_STOP', 'Подія зупинена');
+  updateEventBanner();
+  alert('Подію зупинено!');
+}
+
+function addCustomItem() {
+  const name = document.getElementById('item-name').value;
+  const icon = document.getElementById('item-icon').value;
+  const desc = document.getElementById('item-desc').value;
+  const cost = parseInt(document.getElementById('item-cost').value);
+  const category = document.getElementById('item-category').value;
+  
+  if (!name || !icon || !desc || isNaN(cost)) {
+    return alert('Заповніть всі поля!');
+  }
+  
+  const item = {
+    id: 'custom_' + Date.now(),
+    name,
+    icon,
+    desc,
+    baseCost: cost,
+    level: 0,
+    maxLevel: 1,
+    eff: u => u.level ? '✅ Активно' : '',
+    color: '#9c27b0',
+    category,
+    unlockLevel: 1
+  };
+  
+  DB.customItems.push(item);
+  DB.save();
+  DB.log('ITEM_ADD', `Новий предмет: ${name}`);
+  
+  alert('Предмет додано!');
+  
+  // Clear inputs
+  document.getElementById('item-name').value = '';
+  document.getElementById('item-icon').value = '';
+  document.getElementById('item-desc').value = '';
+  document.getElementById('item-cost').value = '';
+}
+
+function adminAbuse(type, amount) {
+  switch(type) {
+    case 'coins':
+      if (DB.currentUser) {
+        DB.currentUser.coins += amount;
+        DB.updateUser({ coins: DB.currentUser.coins });
+      }
+      coins += amount;
+      updateCoinDisplay();
+      announce(`💰 +${amount} монет!`);
+      break;
+    case 'level':
+      if (DB.currentUser) {
+        DB.currentUser.level = (DB.currentUser.level || 1) + amount;
+        DB.updateUser({ level: DB.currentUser.level });
+      }
+      updateLevelDisplay();
+      announce(`⭐ +${amount} рівнів!`);
+      break;
+    case 'unlockAll':
+      allU().forEach(u => {
+        if (u.unlockLevel) u.unlockLevel = 1;
+      });
+      announce('🔓 Все розблоковано!');
+      break;
+    case 'maxUpgrades':
+      allU().forEach(u => u.level = u.maxLevel);
+      announce('⬆️ Всі апгрейди MAX!');
+      break;
+    case 'godMode':
+      godMode = !godMode;
+      announce(godMode ? '👼 GOD MODE ON!' : '👼 GOD MODE OFF');
+      break;
+    case 'infiniteShield':
+      shieldCount = 999;
+      announce('🛡️ ∞ Щитів!');
+      break;
+    case 'megaMagnet':
+      megaMagnetActive = !megaMagnetActive;
+      announce(megaMagnetActive ? '🧲 МЕГА МАГНІТ ON!' : '🧲 МЕГА МАГНІТ OFF');
+      break;
+  }
+  
+  DB.log('ADMIN_ABUSE', type + (amount ? `: ${amount}` : ''));
+  sfxBonus();
+}
+
+function clearLogs() {
+  DB.logs = [];
+  DB.save();
+  renderAdminLogs();
+}
+
+function renderAdminLogs() {
+  const logEl = document.getElementById('admin-log');
+  logEl.innerHTML = DB.logs.map(l => 
+    `<div>[${l.time}] ${l.user}: ${l.action} ${l.details}</div>`
+  ).join('');
+}
+
+// ── AUTH ──
+let authMode = 'login';
+
+document.querySelectorAll('#auth-screen .auth-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    authMode = t.dataset.tab;
+    document.querySelectorAll('#auth-screen .auth-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === authMode));
+    document.getElementById('auth-btn').textContent = authMode === 'login' ? 'Увійти' : 'Зареєструватися';
+    document.getElementById('auth-error').textContent = '';
+  });
+});
+
+document.getElementById('auth-btn').addEventListener('click', () => {
+  const name = document.getElementById('auth-name').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  
+  let result;
+  if (authMode === 'login') {
+    result = DB.login(name, pass);
+  } else {
+    result = DB.register(name, pass);
+    if (result.success) {
+      result = DB.login(name, pass);
+    }
+  }
+  
+  if (result.error) {
+    document.getElementById('auth-error').textContent = result.error;
+    return;
+  }
+  
+  // Load user data
+  if (DB.currentUser) {
+    coins = DB.currentUser.coins || 0;
+    bestCoins = DB.currentUser.bestScore || 0;
+    
+    // Load upgrades
+    if (DB.currentUser.upgrades) {
+      allU().forEach(u => {
+        if (DB.currentUser.upgrades[u.id] !== undefined) {
+          u.level = DB.currentUser.upgrades[u.id];
+        }
+      });
+    }
+  }
+  
+  showStartScreen();
+});
+
+document.getElementById('auth-skip').addEventListener('click', () => {
+  DB.currentUser = null;
+  showStartScreen();
+});
+
+function showStartScreen() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'flex';
+  
+  const welcome = document.getElementById('user-welcome');
+  if (DB.currentUser) {
+    welcome.textContent = `Привіт, ${DB.currentUser.isAdmin ? '👑 ' : ''}${DB.currentUser.name}!`;
+  } else {
+    welcome.textContent = 'Привіт, Гість!';
+  }
+  
+  updateCoinDisplay();
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  // Save before logout
+  if (DB.currentUser) {
+    const upgrades = {};
+    allU().forEach(u => upgrades[u.id] = u.level);
+    DB.currentUser.upgrades = upgrades;
+    DB.updateUser(DB.currentUser);
+  }
+  
+  DB.currentUser = null;
+  coins = 0;
+  bestCoins = 0;
+  allU().forEach(u => u.level = 0);
+  
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-name').value = '';
+  document.getElementById('auth-pass').value = '';
+  document.getElementById('auth-error').textContent = '';
+});
+
+// ── EVENT LISTENERS ──
+document.querySelectorAll('#shop-modal .shop-tab').forEach(t=>t.addEventListener('click',()=>renderShop(t.dataset.tab)));
+document.getElementById('shop-btn').addEventListener('click',()=>{ initAudio(); renderShop(currentTab); document.getElementById('shop-modal').style.display='flex'; });
+document.getElementById('close-shop').addEventListener('click',()=>document.getElementById('shop-modal').style.display='none');
+
+document.getElementById('lb-btn').addEventListener('click', () => {
+  renderLeaderboard();
+  document.getElementById('lb-modal').style.display = 'flex';
+});
+document.getElementById('close-lb').addEventListener('click', () => document.getElementById('lb-modal').style.display = 'none');
+
+document.getElementById('admin-btn').addEventListener('click', () => {
+  renderAdminUsers();
+  renderAdminLogs();
+  document.getElementById('admin-modal').style.display = 'flex';
+});
+document.getElementById('close-admin').addEventListener('click', () => document.getElementById('admin-modal').style.display = 'none');
+
+document.querySelectorAll('#admin-modal .admin-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#admin-modal .admin-tab').forEach(tab => tab.classList.toggle('active', tab === t));
+    document.querySelectorAll('.admin-section').forEach(sec => sec.classList.toggle('active', sec.id === `admin-${t.dataset.tab}`));
+  });
+});
+
+document.getElementById('admin-search').addEventListener('input', e => renderAdminUsers(e.target.value));
+
+document.getElementById('start-btn').addEventListener('click',startGame);
+document.getElementById('restart-btn').addEventListener('click',startGame);
+document.getElementById('mute-btn').addEventListener('click',()=>{ initAudio(); setMute(!muted); });
+
+// ══════════════════════════════════════════════
+// CROSS-TAB STORAGE SYNC (додано слухача)
+// ══════════════════════════════════════════════
+window.addEventListener('storage', (event) => {
+  if (!event.key) return;
+  if (event.key === 'gte_globalmsg') {
+    const newMsg = JSON.parse(event.newValue);
+    if (newMsg && Date.now() < newMsg.expires) {
+      showGlobalMessage(newMsg.text, Math.floor((newMsg.expires - Date.now()) / 1000));
+    } else {
+      const el = document.getElementById('global-msg');
+      el.style.display = 'none';
+    }
+  }
+  if (event.key === 'gte_event') {
+    DB.activeEvent = JSON.parse(event.newValue);
+    updateEventBanner();
+  }
+  if (event.key === 'gte_users') {
+    DB.users = JSON.parse(event.newValue || '{}');
+    if (DB.currentUser && DB.users[DB.currentUser.name]) {
+      DB.currentUser = DB.users[DB.currentUser.name];
+      updateCoinDisplay();
+      updateLevelDisplay();
+    }
+    if (document.getElementById('lb-modal').style.display === 'flex') {
+      renderLeaderboard();
+    }
+    if (document.getElementById('admin-modal').style.display === 'flex') {
+      renderAdminUsers(document.getElementById('admin-search').value);
+    }
+  }
+});
+
+// Check for existing session
+window.addEventListener('load', () => {
+  updateEventBanner();
+  
+  // Auto-login check could be added here
+  // For now, always show auth screen
+});
+</script>
+</body>
+</html>
